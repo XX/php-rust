@@ -18,7 +18,6 @@ crate-type = ["cdylib"]
 [dependencies]
 libc = "0.2.53"
 derive_more = "0.14.0"
-#php-sys = "7.2.12"
 
 [profile.release]
 opt-level = 3
