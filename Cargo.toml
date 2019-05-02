@@ -7,6 +7,19 @@ edition = "2018"
 [lib]
 name = "php_rust"
 
+[[example]]
+name = "return_string"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "print_array"
+crate-type = ["cdylib"]
+
 [dependencies]
 libc = "0.2.53"
 derive_more = "0.14.0"
+#php-sys = "7.2.12"
+
+[profile.release]
+opt-level = 3
+lto = true
