@@ -1,5 +1,5 @@
 use libc::*;
-use crate::{ExecuteData, zend::zval};
+use crate::{ExecuteData, Zval};
 
 pub(crate) type StartupFunc = extern fn (type_: c_int, module_number: c_int) -> c_int;
 pub(crate) type ShutdownFunc = extern fn (type_: c_int, module_number: c_int) -> c_int;
@@ -7,7 +7,7 @@ pub(crate) type InfoFunc = extern fn () ;
 pub(crate) type GlobalsCtorFunc = extern fn (global: *const c_void) -> c_void;
 pub(crate) type GlobalsDtorFunc = extern fn (global: *const c_void) -> c_void;
 pub(crate) type PostDeactivateFunc = extern fn () -> c_int;
-pub(crate) type HandlerFunc = extern fn (execute_data: &ExecuteData, retval: &mut zval);
+pub(crate) type HandlerFunc = extern fn (execute_data: &ExecuteData, retval: &mut Zval);
 
 //pub struct ExecuteData {}
 

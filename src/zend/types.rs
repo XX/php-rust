@@ -1,5 +1,6 @@
 use std::mem;
 use std::os::raw::{c_uchar, c_void, c_int};
+use crate::zend::zend_function;
 
 /// Export renamed zend types
 pub type Long = zend_long;
@@ -11,6 +12,7 @@ pub type DtorFuncT = dtor_func_t;
 pub type Type = zend_type;
 pub type Value = zend_value;
 pub type Zval = zval;
+pub type ValueWw = zend_value_ww;
 pub type RefcountedH = zend_refcounted_h;
 pub type Refcounted = zend_refcounted;
 pub type String = zend_string;
@@ -145,7 +147,7 @@ pub union zend_value {
     pub zv: *mut zval,
     pub ptr: *mut c_void,
 //    pub ce: *mut zend_class_entry,
-//    pub func: *mut zend_function,
+    pub func: *mut zend_function,
     pub ww: zend_value_ww,
 }
 
@@ -202,9 +204,82 @@ pub union zval_u2 {
 
 impl zval {
     #[inline]
-    pub fn new_str(&mut self, src: &str, persistent: bool) {
+    pub fn set_undef(&mut self) {
+        self.set_type_info(IS_UNDEF as u32);
+    }
+
+    #[inline]
+    pub fn set_null(&mut self) {
+        self.set_type_info(IS_NULL as u32);
+    }
+
+    #[inline]
+    pub fn set_false(&mut self) {
+        self.set_type_info(IS_FALSE as u32);
+    }
+
+    #[inline]
+    pub fn set_true(&mut self) {
+        self.set_type_info(IS_TRUE as u32);
+    }
+
+    #[inline]
+    pub fn set_bool(&mut self, value: bool) {
+        self.set_type_info(if value {IS_TRUE} else {IS_FALSE} as u32);
+    }
+
+    #[inline]
+    pub fn set_long(&mut self, value: zend_long) {
+        self.value.lval = value;
+        self.set_type_info(IS_LONG as u32);
+    }
+
+    #[inline]
+    pub fn set_double(&mut self, value: f64) {
+        self.value.dval = value;
+        self.set_type_info(IS_DOUBLE as u32);
+    }
+
+    #[inline]
+    pub fn set_new_str(&mut self, src: &str, persistent: bool) {
         self.value.str = zend_string::init(src, persistent);
         self.set_type_info(IS_STRING_EX);
+    }
+
+    #[inline]
+    pub fn is_undef(&self) -> bool {
+        self.get_type() == IS_UNDEF as zend_uchar
+    }
+
+    #[inline]
+    pub fn is_indirect(&self) -> bool {
+        self.get_type() == IS_INDIRECT as zend_uchar
+    }
+
+    #[inline]
+    pub fn is_bool(&self) -> bool {
+        let t = self.get_type() as zend_type;
+        t == IS_TRUE || t == IS_FALSE
+    }
+
+    #[inline]
+    pub fn is_long(&self) -> bool {
+        self.get_type() == IS_LONG as zend_uchar
+    }
+
+    #[inline]
+    pub fn is_double(&self) -> bool {
+        self.get_type() == IS_DOUBLE as zend_uchar
+    }
+
+    #[inline]
+    pub fn is_string(&self) -> bool {
+        self.get_type() == IS_STRING as zend_uchar
+    }
+
+    #[inline]
+    pub fn is_array(&self) -> bool {
+        self.get_type() == IS_ARRAY as zend_uchar
     }
 
     #[inline]
@@ -275,15 +350,9 @@ impl Default for zend_refcounted_h {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Default, Copy, Clone)]
 pub struct zend_refcounted {
     pub gc: zend_refcounted_h,
-}
-
-impl Default for zend_refcounted {
-    fn default() -> Self {
-        unsafe { mem::zeroed() }
-    }
 }
 
 #[repr(C)]
@@ -359,6 +428,7 @@ impl Bucket {
 }
 
 pub type HashTable = zend_array;
+pub type HashPosition = u32;
 
 #[repr(C)]
 #[derive(Copy, Clone)]

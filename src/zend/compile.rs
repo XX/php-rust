@@ -6,6 +6,8 @@ use crate::zend::{
 };
 
 pub type ExecuteData = zend_execute_data;
+pub type Function = zend_function;
+pub type FunctionCommon = zend_function_common;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -74,7 +76,7 @@ pub struct zend_internal_function {
     pub arg_flags: [zend_uchar; 3usize],
     pub fn_flags: u32,
     pub function_name: *mut zend_string,
-    pub scope: *mut (), // todo: use zend_class_entry instead of ()
+    pub scope: *mut c_void, // todo: use zend_class_entry instead of c_void
     pub prototype: *mut zend_function,
     pub num_args: u32,
     pub required_num_args: u32,
@@ -82,7 +84,7 @@ pub struct zend_internal_function {
     /* END of common elements */
 
     pub handler: zif_handler,
-    pub module: *mut (), // todo; use zend_module_entry instead of ()
+    pub module: *mut c_void, // todo; use zend_module_entry instead of c_void
     pub reserved: [*mut c_void; ZEND_MAX_RESERVED_RESOURCES],
 }
 
@@ -105,7 +107,7 @@ pub struct zend_function_common {
     pub arg_flags: [zend_uchar; 3usize],
     pub fn_flags: u32,
     pub function_name: *mut zend_string,
-    pub scope: *mut (), // todo: use zend_class_entry instead of ()
+    pub scope: *mut c_void, // todo: use zend_class_entry instead of c_void
     pub prototype: *mut zend_function,
     pub num_args: u32,
     pub required_num_args: u32,
@@ -132,7 +134,7 @@ pub struct zend_op_array {
     pub arg_flags: [zend_uchar; 3usize],
     pub fn_flags: u32,
     pub function_name: *mut zend_string,
-    pub scope: *mut (), // todo: use zend_class_entry instead of ()
+    pub scope: *mut c_void, // todo: use zend_class_entry instead of c_void
     pub prototype: *mut zend_function,
     pub num_args: u32,
     pub required_num_args: u32,
@@ -166,7 +168,7 @@ pub struct zend_op_array {
 }
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone)]
 pub struct zend_brk_cont_element {
     pub start: c_int,
     pub cont: c_int,
@@ -174,24 +176,14 @@ pub struct zend_brk_cont_element {
     pub parent: c_int,
 }
 
-impl Default for zend_brk_cont_element {
-    fn default() -> Self {
-        unsafe { mem::zeroed() }
-    }
-}
-
+#[repr(C)]
+#[derive(Default, Debug, Copy, Clone)]
 pub struct zend_try_catch_element {
     pub try_op: u32,
     /// ketchup!
     pub catch_op: u32,
     pub finally_op: u32,
     pub finally_end: u32,
-}
-
-impl Default for zend_try_catch_element {
-    fn default() -> Self {
-        unsafe { mem::zeroed() }
-    }
 }
 
 /// arg_info for internal functions

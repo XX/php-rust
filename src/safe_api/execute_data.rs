@@ -1,7 +1,9 @@
-use std::ptr;
+use std::{ptr, slice};
 use std::os::raw::c_int;
-use crate::{c_str, zend};
+use crate::{c_str, zend, Zval};
 
+#[repr(C)]
+#[derive(Copy, Clone)]
 pub struct ExecuteData(zend::ExecuteData);
 
 impl ExecuteData {
@@ -11,25 +13,15 @@ impl ExecuteData {
     }
 
     #[inline]
-    pub fn parse_double_parameter(&self) -> Option<f64> {
-        let mut d: f64 = 0.0;
-        if unsafe { zend::zend_parse_parameters(
-                self.num_args() as c_int, c_str!("d"), &mut d as *mut _
-        ) }.is_success() {
-            Some(d)
-        } else {
-            None
-        }
-    }
+    pub fn parse_parameters(&self) -> Option<&mut [Zval]> {
+        let mut args: *mut Zval = ptr::null_mut();
+        let mut argc: c_int = 0;
 
-    #[inline]
-    pub fn parse_array_parameter(&self) -> Option<&zend::Array> {
-        let val: *mut zend::Zval = ptr::null_mut();
         unsafe {
             if zend::zend_parse_parameters(
-                self.num_args() as c_int, c_str!("a"), &val
+                self.num_args() as c_int, c_str!("*"), &mut args, &mut argc
             ).is_success() {
-                Some(&*(*val).value.arr)
+                Some(slice::from_raw_parts_mut(args, argc as usize))
             } else {
                 None
             }

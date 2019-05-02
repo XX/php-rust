@@ -1,7 +1,7 @@
 use std::mem;
 use std::os::raw::{c_char, c_int};
 use crate::zend::{
-    zend_type, zval, zend_execute_data, zend_internal_arg_info, ZEND_RESULT_CODE,
+    zval, zend_execute_data, zend_internal_arg_info, ZEND_RESULT_CODE,
 };
 
 pub type FunctionEntry = zend_function_entry;
@@ -10,8 +10,8 @@ pub type zif_handler = Option<unsafe extern fn(execute_data: *mut zend_execute_d
 
 /* Parameter parsing API */
 
-pub const ZEND_PARSE_PARAMS_QUIET: zend_type = 1 << 1;
-pub const ZEND_PARSE_PARAMS_THROW: zend_type = 1 << 2;
+pub const ZEND_PARSE_PARAMS_QUIET: c_int = 1 << 1;
+pub const ZEND_PARSE_PARAMS_THROW: c_int = 1 << 2;
 
 extern {
     pub fn zend_parse_parameters(num_args: c_int, type_spec: *const c_char, ...) -> ZEND_RESULT_CODE;

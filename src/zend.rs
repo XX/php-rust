@@ -8,7 +8,6 @@ pub use self::hash::*;
 pub use self::types::*;
 pub use self::string::*;
 pub use self::module::*;
-pub use self::function::*;
 pub use self::portability::*;
 pub use self::variables::*;
 
@@ -19,6 +18,5 @@ pub mod hash;
 pub mod types;
 pub mod string;
 pub mod module;
-pub mod function;
 pub mod portability;
 pub mod variables;

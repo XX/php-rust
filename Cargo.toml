@@ -8,4 +8,5 @@ edition = "2018"
 name = "php_rust"
 
 [dependencies]
-libc = "0.2"
+libc = "0.2.53"
+derive_more = "0.14.0"

@@ -10,8 +10,15 @@ macro_rules! c_str {
 macro_rules! funs {
     ($($fname:ident),*) => {
         Box::new(
-            [$($crate::zend::Function::new(c_str!(stringify!($fname)), $fname),)* $crate::zend::Function::end()]
+            [$($crate::Function::new($crate::c_str!(stringify!($fname)), $fname),)* $crate::Function::end()]
         )
+    }
+}
+
+#[macro_export]
+macro_rules! str_index {
+    ($s:expr) => {
+        $crate::ArrayIndex::NtStr(concat!($s, "\0"))
     }
 }
 

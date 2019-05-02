@@ -2,7 +2,7 @@ use std;
 use std::mem;
 use libc::*;
 use crate::c_str;
-use super::function::*;
+use crate::function::*;
 
 pub struct ModuleDep {}
 
