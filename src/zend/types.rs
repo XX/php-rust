@@ -1,10 +1,11 @@
 use std::mem;
-use std::os::raw::{c_uchar, c_void, c_int};
+use std::os::raw::{c_uchar, c_char, c_void, c_int};
 use crate::zend::zend_function;
 
 /// Export renamed zend types
 pub type Long = zend_long;
 pub type Ulong = zend_ulong;
+pub type Double = f64;
 pub type OffT = zend_off_t;
 pub type Bool = zend_bool;
 pub type Uchar = zend_uchar;
@@ -20,6 +21,7 @@ pub type Array = zend_array;
 pub type Reference = zend_reference;
 
 pub type Flag = u32;
+pub type VaList = *mut c_char;
 
 /// regular data types
 pub const IS_UNDEF: zend_type = 0;
@@ -166,6 +168,12 @@ pub struct zval {
     pub u2: zval_u2,
 }
 
+impl Default for zval {
+    fn default() -> Self {
+        unsafe { mem::zeroed() }
+    }
+}
+
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union zval_u1 {
@@ -238,6 +246,18 @@ impl zval {
     pub fn set_double(&mut self, value: f64) {
         self.value.dval = value;
         self.set_type_info(IS_DOUBLE as u32);
+    }
+
+//    #[inline]
+//    pub fn set_str(&mut self, value: &mut zend_string) {
+//        self.value.str = value as *mut _;
+//        self.set_type_info();
+//    }
+
+    #[inline]
+    pub fn set_arr(&mut self, value: &mut zend_array) {
+        self.value.arr = value as *mut _;
+        self.set_type_info(IS_ARRAY_EX);
     }
 
     #[inline]

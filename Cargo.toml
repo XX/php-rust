@@ -7,6 +7,7 @@ edition = "2018"
 [lib]
 name = "php_rust"
 
+
 [[example]]
 name = "return_string"
 crate-type = ["cdylib"]
@@ -15,9 +16,13 @@ crate-type = ["cdylib"]
 name = "print_array"
 crate-type = ["cdylib"]
 
+[[example]]
+name = "return_array"
+crate-type = ["cdylib"]
+
+
 [dependencies]
 libc = "0.2.53"
-derive_more = "0.14.0"
 
 [profile.release]
 opt-level = 3

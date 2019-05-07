@@ -14,6 +14,8 @@ pub fn print_variable(var: *const zval) -> usize {
     unsafe { zend_print_variable(var) }
 }
 
+pub const ZVAL_PTR_DTOR: unsafe extern fn(*mut zval) = _zval_ptr_dtor;
+
 impl zval {
     #[inline]
     pub fn ptr_dtor(zval_ptr: *mut Self) {

@@ -3,7 +3,7 @@ use std::{
     cmp::PartialEq,
 };
 use crate::{
-    zend, Long, ZString, Array, ArrayApi, ArrayIndex, BucketsIter, BucketsIterMut,
+    zend, Long, Double, ZString, Array, ArrayApi, ArrayIndex, BucketsIter, BucketsIterMut,
     VoidPtrMut, Refcounted, ToSafe
 };
 
@@ -51,17 +51,37 @@ impl Zval {
 
     #[inline]
     pub fn as_array(&self) -> Option<Array> {
-        if self.0.get_type() as zend::Type == zend::IS_ARRAY {
-            Some(unsafe { self.0.value.arr.into_safe() })
-        } else {
-            None
+        unsafe {
+            if self.0.get_type() as zend::Type == zend::IS_ARRAY {
+                Some(self.0.value.arr.into_safe())
+            } else {
+                None
+            }
         }
+    }
+
+    #[inline]
+    pub fn raw(self) -> zend::Zval {
+        self.0
+    }
+
+    #[inline]
+    pub fn as_raw(&self) -> *const zend::Zval {
+        &self.0 as *const _
+    }
+
+    #[inline]
+    pub fn as_raw_mut(&mut self) -> *mut zend::Zval {
+        &mut self.0 as *mut _
     }
 }
 
 impl ArrayApi for Zval {
     #[inline]
-    fn get<'a, I: Into<ArrayIndex<'a>>>(&self, index: I) -> Option<&Zval> {
+    fn get<'a, I>(&self, index: I) -> Option<&Zval>
+    where
+        I: Into<ArrayIndex<'a>>
+    {
         self.as_array()
             .expect("Can't convert Zval to Array because it is not array")
             .get(index)
@@ -69,7 +89,22 @@ impl ArrayApi for Zval {
     }
 
     #[inline]
-    fn exists<'a, I: Into<ArrayIndex<'a>>>(&self, index: I) -> bool {
+    fn insert<'a, I, V>(&mut self, index: I, val: V) -> Option<&Zval>
+    where
+        I: Into<ArrayIndex<'a>>,
+        V: Into<Zval>,
+    {
+        self.as_array()
+            .expect("Can't convert Zval to Array because it is not array")
+            .insert(index, val)
+            .map(|zv| unsafe { &*(zv as *const _) })
+    }
+
+    #[inline]
+    fn exists<'a, I>(&self, index: I) -> bool
+    where
+        I: Into<ArrayIndex<'a>>
+    {
         self.as_array()
             .expect("Can't convert Zval to Array because it is not array")
             .exists(index)
@@ -119,6 +154,30 @@ impl DerefMut for Zval {
 impl PartialEq for Zval {
     fn eq(&self, other: &Zval) -> bool {
         self.value() == other.value()
+    }
+}
+
+impl From<Long> for Zval {
+    fn from(from: Long) -> Self {
+        let mut zv = zend::Zval::default();
+        zv.set_long(from);
+        Zval(zv)
+    }
+}
+
+impl From<Double> for Zval {
+    fn from(from: Double) -> Self {
+        let mut zv = zend::Zval::default();
+        zv.set_double(from);
+        Zval(zv)
+    }
+}
+
+impl From<&'_ str> for Zval {
+    fn from(from: &'_ str) -> Self {
+        let mut zv = zend::Zval::default();
+        zv.set_new_str(from, false);
+        Zval(zv)
     }
 }
 

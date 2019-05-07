@@ -10,6 +10,7 @@ pub use zval::*;
 
 pub use zend::Long;
 pub use zend::Ulong;
+pub use zend::Double;
 pub use zend::OffT;
 pub use zend::Bool;
 pub use zend::Uchar;
